@@ -3,13 +3,74 @@ body {
   padding: 0;
 }
 
-/*.link {
-  border-style: solid;
-  border-width: 15px;
-}
-*/
 
-.link {
+
+
+path {
+  fill: none;
+  stroke: #000;
+  stroke-width: 12px;
+  stroke-linecap: round;
+}
+
+
+body {
+  overflow: hidden;
+  margin: 0;
+  font: 14px "Helvetica Neue";
+}
+
+svg {
+  width: 1280px;
+  height: 800px;
+}
+
+#chart, #header {
+  position: absolute;
+  top: 0;
+}
+
+#header {
+  z-index: 1;
+  display: block;
+}
+
+#header {
+  top: 80px;
+  left: 140px;
+  font: 300 36px "Helvetica Neue";
+}
+
+rect {
+  fill: none;
+  pointer-events: all;
+}
+
+pre {
+  font-size: 18px;
+}
+
+line {
   stroke: #000;
   stroke-width: 1.5px;
+}
+
+.string, .regexp {
+  color: #f39;
+}
+
+.keyword {
+  color: #00c;
+}
+
+.comment {
+  color: #555;
+}
+
+.number {
+  color: #369;
+}
+
+.class, .special {
+  color: #1181B8;
 }
