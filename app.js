@@ -1,12 +1,19 @@
-var w = window.innerWidth,
-    h = window.innerHeight;
+var settings = {
+
+  droplets: 100,
+  speed: 1500,
+  w: window.innerWidth,
+  h: window.innerHeight,
+  dropletWidth: 30,
+  dropletHeight: 30
+};
 
 var randomX = function(){
-  return Math.floor(w * Math.random()) - 15;
+  return Math.floor(settings.w * Math.random()) - 15;
 };
 
 var randomY = function(){
-  return Math.floor(h * Math.random()) - 15;
+  return Math.floor(settings.h * Math.random()) - 15;
 };
 
 var force = d3.layout.force()
@@ -14,39 +21,50 @@ var force = d3.layout.force()
     .linkStrength(2)
     .gravity(.02)
     .charge(-10)
-    .size([w, h]);
+    .size([settings.w, settings.h]);
 
 var nodes = force.nodes(),
     links = force.links();
 
 var svg = d3.select("#chart").append("svg:svg")
-    .attr("width", w)
-    .attr("height", h);
+    .attr("width", settings.w)
+    .attr("height", settings.h)
+    .attr('class','board');
 
-svg.append("svg:rect")
-    .attr("width", w)
-    .attr("height", h);
+// svg.append("svg:rect")
+//     .attr("width", w)
+//     .attr("height", h);
 
 droplets = d3.select('#chart svg');
 
+
+// nodeEnter.append("svg:image")
+//    .attr('x',-9)
+//    .attr('y',-12)
+//    .attr('width', 20)
+//    .attr('height', 24)
+//    .attr("xlink:href","resources/images/check.png")
+
 var raindrops = droplets.selectAll('circle.raindrop')
-    .data(d3.range(100)).enter().append('svg:circle')
-    .style('fill','blue')
+    .data(d3.range(settings.droplets)).enter().append('svg:image')
+    //.style('fill','blue')
     .attr('class', 'raindrop')
-    .attr('cx', function() { return randomX(); })
-    .attr('cy', function() { return 20; })
-    .attr('r', 15);
+    .attr('x', function() { return randomX(); })
+    .attr('y', function() { return -40; })
+    .attr('width', settings.dropletWidth)
+    .attr('height', settings.dropletHeight)
+    .attr('xlink:href','img/boom.png');
 
 
 var drop = function(elements) {
   elements
-      .attr('cx', function() { return randomX(); })
-      .attr('cy', function() { return 20; })
+      .attr('x', function() { return randomX(); })
+      .attr('y', function() { return -40; })
       .transition()
       .ease('quad')
+      .duration(settings.speed)
       .delay(function() { return Math.random() * 5000; })
-      .duration(1500)
-      .attr('cy', h)
+      .attr('y', settings.h)
       .each('end', function() { drop(d3.select(this)); });
 };
 
@@ -91,12 +109,12 @@ svg.on("mousemove", function() {
   force.start();
 });
 
-// d3.timer(function(){
-//   d3.selectAll('.raindrop')
-//   .transition()
-//   .ease('quad')
-//   .attr('cy', h );
-// }, 3000);
+window.onresize =  function() {
+  d3.select(".board")
+    .attr("width", window.innerWidth)
+    .attr("height", window.innerHeight);
+};
+
 
 
 
