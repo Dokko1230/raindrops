@@ -1,6 +1,6 @@
 var settings = {
-
-  droplets: 100,
+  offsetX: 25,
+  droplets: 130,
   speed: 1500,
   w: window.innerWidth,
   h: window.innerHeight,
@@ -64,6 +64,7 @@ var drop = function(elements) {
       .ease('quad')
       .duration(settings.speed)
       .delay(function() { return Math.random() * 5000; })
+      .attr('x', function(d) { return parseInt(d3.select(this).attr('x')) + settings.offsetX; })
       .attr('y', settings.h)
       .each('end', function() { drop(d3.select(this)); });
 };
@@ -115,6 +116,25 @@ window.onresize =  function() {
     .attr("height", window.innerHeight);
 };
 
+var speedSlider = document.getElementById('rainSpeed');
+var windSlider = document.getElementById('rainDirection');
 
+document.addEventListener('keydown', function(event) {
 
+  if (+speedSlider.value >= +speedSlider.min && +speedSlider.value <= +speedSlider.max){
+    if(event.keyCode === 38) { // up
+      speedSlider.value = speedSlider.value - 1;
+    } else if(event.keyCode === 40) { // down
+      speedSlider.value = speedSlider.value + 1;
+    } else if(event.keyCode === 37) { // left
+      console.log(windSlider.value);
+      windSlider.value = windSlider.value - 1;
+      console.log(windSlider.value);
+    } else if(event.keyCode === 39) { // right
+      windSlider.value = windSlider.value + 1;
+    }
+    settings.speed = 500 * speedSlider.value;
+    settings.offsetX = (windSlider.value - 5) * 75;// 5 === 0
+  }
+});
 
