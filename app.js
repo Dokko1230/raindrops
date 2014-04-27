@@ -1,57 +1,102 @@
-// console.log("test");
+var w = window.innerWidth,
+    h = window.innerHeight;
 
-var width = 800;
-var height = 800;
+var randomX = function(){
+  return Math.floor(w * Math.random()) - 15;
+};
 
-var svg = d3.select("body").append("svg:svg")
-    .attr("width", width)
-    .attr("height", height);
-
-var nodes = [],
-    links = [];
-
-var a = {id: "a", fixed: true}, b = {id: "b"};
-nodes.push(a,b);
-links.push({source: a, target: b});
+var randomY = function(){
+  return Math.floor(h * Math.random()) - 15;
+};
 
 var force = d3.layout.force()
-    .gravity(0.2)
-    .size([width/2, height/2])
-    .nodes(nodes)
+    .linkDistance(2)
     .linkStrength(2)
-    .links(links)
-    .on('tick', tick)
-    .start();
+    .gravity(.02)
+    .charge(-10)
+    .size([w, h]);
 
-// var links = d3.layout.tree().links(nodes);
+var nodes = force.nodes(),
+    links = force.links();
 
-var link = svg.selectAll('line')
-              .data(links)
-              .enter()
-              .insert('line', '.link')
-              //.insert('svg:line')
-              .attr('fill', 'red')
-              .attr('class', 'link');
+var svg = d3.select("#chart").append("svg:svg")
+    .attr("width", w)
+    .attr("height", h);
 
-var node = svg.selectAll('circle.node')
-              .data(nodes)
-              .enter()
-              .append('svg:circle')
-              .attr('r', 8)
-              // .attr('cx', function(d) { return d.x; })
-              // .attr('cy', function(d) { return d.y; })
-              .attr('class', 'node')
-              .call(force.drag);
+svg.append("svg:rect")
+    .attr("width", w)
+    .attr("height", h);
 
-function tick() {
-  node.attr("cx", function(d) { return d.x; })
-      .attr("cy", function(d) { return d.y; })
+droplets = d3.select('#chart svg');
 
-  link.attr("x1", function(d) { return d.source.x; })
-      .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; });
-}
+var raindrops = droplets.selectAll('circle.raindrop')
+    .data(d3.range(100)).enter().append('svg:circle')
+    .style('fill','blue')
+    .attr('class', 'raindrop')
+    .attr('cx', function() { return randomX(); })
+    .attr('cy', function() { return 20; })
+    .attr('r', 15);
 
 
-console.log(node);
+var drop = function(elements) {
+  elements
+      .attr('cx', function() { return randomX(); })
+      .attr('cy', function() { return 20; })
+      .transition()
+      .ease('quad')
+      .delay(function() { return Math.random() * 5000; })
+      .duration(1500)
+      .attr('cy', h)
+      .each('end', function() { drop(d3.select(this)); });
+};
+
+drop(raindrops);
+
+var path = svg.append("svg:path")
+    .data([nodes]);
+
+var line = d3.svg.line()
+    .interpolate("basis")
+    .x(function(d) { return d.x; })
+    .y(function(d) { return d.y; });
+
+force.on("tick", function() {
+  path.attr("d", line);
+});
+
+var p0;
+
+svg.on("mousemove", function() {
+  // console.log(d3);
+  // console.log(d3.svg);
+  // console.log(d3.svg.mouse(this));
+  var p1 = d3.svg.mouse(this),
+      node = {x: p1[0], y: p1[1], px: (p0 || (p0 = p1))[0], py: p0[1]},
+      link = {source: node, target: nodes[nodes.length - 1] || node};
+
+  p0 = p1;
+  if (nodes.length > 1) {
+    node.fixed = true;
+    nodes[nodes.length - 1].fixed = false;
+  }
+
+  d3.timer(function() {
+    nodes.shift();
+    links.shift();
+    return true;
+  }, 200);
+
+  nodes.push(node);
+  links.push(link);
+  force.start();
+});
+
+// d3.timer(function(){
+//   d3.selectAll('.raindrop')
+//   .transition()
+//   .ease('quad')
+//   .attr('cy', h );
+// }, 3000);
+
+
+
